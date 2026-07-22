@@ -367,31 +367,89 @@ a{color:inherit;text-decoration:none}
 // ════════════════════════════════════════════════════════════════════
 const PROYECTOS_CONFIG = {
 
-  // ── PROYECTO DEMO (datos de ejemplo — sin Sheet) ─────────────────
   "demo": {
-    sheetId: "",          // Vacío = Claude genera datos de ejemplo
+    sheetId: "",
     nombre: "Proyecto Demo — Gaming Ingeniería",
     cliente: "Cliente Ejemplo",
     tipo: "Consultoría PM"
   },
 
-  // ── PLANTILLA PARA NUEVO PROYECTO ────────────────────────────────
-  // Copiar este bloque y completar para cada cliente:
-  /*
-  "token-del-proyecto": {
-    sheetId: "1ABC...XYZ",   // ID del Google Sheet publicado
-    nombre:  "Nombre del Proyecto",
-    cliente: "Nombre del Cliente",
-    tipo:    "PMO"            // PMO | Consultoría PM | Capacitación
-  },
-  */
-
-  // ── EJEMPLO: CEMIX GT02 ───────────────────────────────────────────
+  // CEMIX GT02 — datos embebidos directamente (sin dependencia de Sheet)
   "cemix-gt02": {
-    sheetId: "2PACX-1vRnpC57HMJEyhcUfVrtX8elKa1pQxNoUdzMuS_DAtC_51GaAL_RKf6YFfNk6WxxDZo-EM4llhBNlqFL",
-    nombre:  "CEMIX - GT02",
-    cliente: "CEMIX Guatemala",
-    tipo:    "PMO"
+    sheetId: "",   // vacío = usa datos embebidos abajo
+    nombre:  "Planta CEMIX Sanarate #2 — Ampliación",
+    cliente: "CEMIX / Saint-Gobain",
+    tipo:    "PMO",
+    // Datos reales del Informe Mensual Ejecutivo — Cierre Junio 2026
+    datosEmbebidos: {
+      proyecto: {
+        nombre: "Planta CEMIX Sanarate #2 — Ampliación",
+        cliente: "CEMIX / Saint-Gobain",
+        tipo: "PMO",
+        consultor: "Gerardo A. Mendoza",
+        periodo: "Junio 2026",
+        fechaInicio: "21/10/2025",
+        fechaCierreContractual: "13/11/2026",
+        fechaActualizacion: "30/06/2026",
+        actualizadoPor: "Gerardo A. Mendoza — Gaming Ingeniería",
+        estado: "En riesgo",
+        avancePlanificado: 73,
+        avanceReal: 65,
+        diasTranscurridos: 253,
+        diasTotales: 388
+      },
+      ev: {
+        bac: 47193668,
+        pv:  34451378,
+        ev:  30675884,
+        ac:  46595504,
+        spi: 0.89,
+        cpi: 0.66,
+        eac: 47067158,
+        etc: 471654,
+        cv:  -15919620,
+        sv:  -3775494
+      },
+      curvaS: {
+        semanas: ["Oct-25","Nov-25","Dic-25","Ene-26","Feb-26","Mar-26","Abr-26","May-26","Jun-26"],
+        planificado: [2,5,10,17,25,34,46,60,73],
+        real:        [1,3,7,13,25,33,57,65,65],
+        ev:          [1,3,7,13,25,33,57,65,65]
+      },
+      fases: [
+        {nombre:"Administrativo",  planificado:73, real:94, estado:"En tiempo"},
+        {nombre:"Licitaciones",    planificado:73, real:93, estado:"En riesgo"},
+        {nombre:"Ejecución (obra)",planificado:0,  real:6,  estado:"En riesgo"},
+        {nombre:"Cierre",          planificado:0,  real:0,  estado:"Pendiente"}
+      ],
+      hitos: [
+        {nombre:"Aprobación DAC/CAPEX",                   fechaPlan:"31/10/2025", fechaReal:"01/12/2025", estado:"done", descripcion:"Trámite SAP completado."},
+        {nombre:"Diseño y desarrollo completo",           fechaPlan:"17/02/2026", fechaReal:"27/03/2026", estado:"done", descripcion:"Todos los diseños técnicos finalizados."},
+        {nombre:"Permiso ambiental obtenido",             fechaPlan:"26/01/2026", fechaReal:"15/05/2026", estado:"done", descripcion:"Obtenido mayo 2026 tras gestión crítica."},
+        {nombre:"Adjudicación contratista civil",         fechaPlan:"03/12/2025", fechaReal:"06/03/2026", estado:"done", descripcion:"Anticipo Q4,057,006 pagado."},
+        {nombre:"Campamento de obra completado",          fechaPlan:"15/04/2026", fechaReal:"27/04/2026", estado:"done", descripcion:"Completado 12 días sobre lo planificado."},
+        {nombre:"Cimentación grúa torre",                 fechaPlan:"26/05/2026", fechaReal:"26/05/2026", estado:"done", descripcion:"Habilitó inicio de montaje grúa."},
+        {nombre:"Adjudicación instalaciones eléctricas",  fechaPlan:"30/05/2026", fechaReal:"15/06/2026", estado:"done", descripcion:"Q2,826,526. Fin programado 30/10/26."},
+        {nombre:"Adjudicación automatización",            fechaPlan:"30/05/2026", fechaReal:"30/06/2026", estado:"done", descripcion:"Q3,358,121. Fin programado 21/10/26."},
+        {nombre:"Finalización montaje grúa torre",        fechaPlan:"14/07/2026", fechaReal:"",           estado:"next", descripcion:"Grúa al 81%. Fin proyectado 14/07/26. Habilita montaje torre."},
+        {nombre:"Inicio montaje estructura planta torre", fechaPlan:"14/07/2026", fechaReal:"",           estado:"next", descripcion:"ID 88. 91 días. Ruta crítica sin holgura."},
+        {nombre:"Adjudicación instalaciones mecánicas",   fechaPlan:"30/06/2026", fechaReal:"",           estado:"late", descripcion:"SIN ADJUDICAR. Inicio ya vencido. URGENTE."},
+        {nombre:"Finalización fabricación estructura",    fechaPlan:"08/09/2026", fechaReal:"",           estado:"future",descripcion:"Al 59% al cierre jun/26. Stock listo para montaje."},
+        {nombre:"Finalización instalaciones eléctricas",  fechaPlan:"30/10/2026", fechaReal:"",           estado:"future",descripcion:"Cable importación 9 semanas en tránsito."},
+        {nombre:"Finalización montaje planta torre",      fechaPlan:"11/11/2026", fechaReal:"",           estado:"future",descripcion:"ID 88. Sin holgura. Depende grúa 14/07."},
+        {nombre:"Finalización y entrega planta CEMIX",    fechaPlan:"29/09/2026", fechaReal:"13/11/2026", estado:"late", descripcion:"Meta original 29/09/26. Proyección +45 días."}
+      ],
+      riesgos: [
+        {nombre:"Retraso montaje planta torre",      descripcion:"Montaje ID88 no ha iniciado. Depende grúa fin 14/07/26. Ruta crítica sin holgura.", impacto:"Alto",  probabilidad:"Alta",  nivel:"high", accion:"Inicio ASAP post-grúa 14/07. Fast-track nivelación paralela.",               responsable:"Contratista / Gaming PM", estado:"Abierto"},
+        {nombre:"Mecánicas sin adjudicar",           descripcion:"ID209 sin adjudicar. Inicio 30/06/26 ya vencido. Bloquea ruta crítica.",            impacto:"Alto",  probabilidad:"Alta",  nivel:"high", accion:"Adjudicar antes 10/07/26. CEMIX requiere acción ejecutiva urgente.",          responsable:"CEMIX / Gaming PM",       estado:"Abierto"},
+        {nombre:"Déficit presupuestal técnico",      descripcion:"Disponible Q598K (1.27% BAC). Déficit técnico ~Q1.8M en adjudicaciones julio.",     impacto:"Alto",  probabilidad:"Alta",  nivel:"high", accion:"Autorización formal uso contingencia Q2.25M con Sponsor antes 15/07/26.",    responsable:"CEMIX CEO / Gaming PM",   estado:"Abierto"},
+        {nombre:"Riesgo izaje de silos",             descripcion:"Plan formal de izaje silos no elaborado. Riesgo crítico de vida en agosto.",         impacto:"Alto",  probabilidad:"Media", nivel:"high", accion:"Elaborar plan de izaje antes de agosto. Validar EHS Saint-Gobain.",           responsable:"Contratista / Gaming PM", estado:"Abierto"},
+        {nombre:"Retraso importación cable eléctrico",descripcion:"Cable eléctrico con 9 semanas de importación desde jun/26. Sin buffer.",           impacto:"Medio", probabilidad:"Media", nivel:"med",  accion:"Monitoreo semanal ETA. Inicio instalación 15/06 confirmado.",                responsable:"Contratista eléc.",       estado:"Abierto"},
+        {nombre:"Sobrerun presupuestal julio",       descripcion:"Mecánicas y neumáticas proyectan sobrerun adicional ~Q1.46M sobre DAC.",            impacto:"Medio", probabilidad:"Alta",  nivel:"med",  accion:"Absorber con contingencia Q2.25M. Reportar a Sponsor en reunión 15/07.",     responsable:"Gaming PM / CEMIX",       estado:"Abierto"},
+        {nombre:"Retraso cimentaciones molienda",    descripcion:"Fundiciones molienda en fast-track julio. 2 frentes activos.",                       impacto:"Medio", probabilidad:"Media", nivel:"med",  accion:"Fast-track 2 frentes. Meta: finalizar julio para no impactar montaje.",      responsable:"Contratista / Gaming PM", estado:"Abierto"},
+        {nombre:"Fin proyectado +45 días vs meta",   descripcion:"Meta original 29/09/26. Proyección actual 13/11/26. Brecha 45 días.",               impacto:"Bajo",  probabilidad:"Alta",  nivel:"low",  accion:"Ejecución fast-track. Recuperación 15-20 días posible sin incidentes.",      responsable:"Gaming PM",               estado:"Abierto"}
+      ]
+    }
   },
 };
 
@@ -664,17 +722,22 @@ Responde SOLO con el JSON.`;
     let data;
     const sheetId = config.sheetId;
 
-    if (sheetId && sheetId.trim() !== "") {
-      // ── MODO REAL: leer desde Google Sheets ────────────────────────
+    // ── MODO DATOS EMBEBIDOS (más confiable, sin CORS) ─────────────
+    if (config.datosEmbebidos) {
+      log("Cargando datos del proyecto...");
+      data = JSON.parse(JSON.stringify(config.datosEmbebidos));
+      log("Datos cargados. Generando análisis IA...");
+    } else if (sheetId && sheetId.trim() !== "") {
+      // ── MODO SHEET: leer desde Google Sheets ──────────────────────
       log("Conectando con Google Sheets...");
       try {
         data = await buildDataFromSheets(sheetId, config);
         data.proyecto.nombre  = data.proyecto.nombre  || config.nombre;
         data.proyecto.cliente = data.proyecto.cliente || config.cliente;
         data.proyecto.tipo    = data.proyecto.tipo    || config.tipo;
-        log("Datos del Sheet leídos correctamente. Generando análisis IA...");
+        log("Datos del Sheet leídos. Generando análisis IA...");
       } catch(sheetErr) {
-        log("Sheet no disponible — " + sheetErr.message + " — usando IA para datos de ejemplo...");
+        log("Sheet no disponible — " + sheetErr.message + " — usando IA para datos...");
         data = null;
       }
     }

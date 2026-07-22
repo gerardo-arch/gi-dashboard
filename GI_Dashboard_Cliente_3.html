@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gaming Ingeniería — Reporte de Proyecto</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+/* ── TOKENS ────────────────────────────────────────────────────── */
+:root {
+  --dark:   #3D4A5C;
+  --mid:    #9EA5AE;
+  --gold:   #F0A500;
+  --white:  #FFFFFF;
+  --bg:     #F4F5F7;
+  --card:   #FFFFFF;
+  --text:   #2C3E50;
+  --light:  #F2F3F4;
+  --green:  #1A8A4A;
+  --red:    #A02020;
+  --amber:  #9A6800;
+  --green-bg:#E8F8F1;
+  --amber-bg:#FFF0C0;
+  --red-bg:  #FDECEA;
+  --r: 12px;
+  --sh: 0 2px 16px rgba(0,0,0,0.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+/* ── TOPBAR ────────────────────────────────────────────────────── */
+.topbar{background:var(--dark);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.tb-left{display:flex;align-items:center;gap:16px}
+.tb-brand{color:#fff;font-size:14px;font-weight:700;letter-spacing:.5px}
+.tb-divider{width:1px;height:20px;background:rgba(255,255,255,.15)}
+.tb-project{color:var(--gold);font-size:13px;font-weight:600}
+.tb-right{display:flex;align-items:center;gap:12px}
+.tb-badge{background:rgba(240,165,0,.15);color:var(--gold);border:1px solid rgba(240,165,0,.3);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600}
+.tb-date{color:var(--mid);font-size:11px}
+
+/* ── GOLD BAR ──────────────────────────────────────────────────── */
+.goldbar{height:4px;background:var(--gold)}
+
+/* ── HERO ──────────────────────────────────────────────────────── */
+.hero{background:var(--dark);padding:32px 32px 0;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:rgba(240,165,0,.06)}
+.hero::after{content:'';position:absolute;bottom:-40px;left:200px;width:180px;height:180px;border-radius:50%;background:rgba(240,165,0,.04)}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;flex-wrap:wrap;gap:16px;position:relative;z-index:1}
+.hero-info h1{color:#fff;font-size:22px;font-weight:700;margin-bottom:6px}
+.hero-info p{color:var(--mid);font-size:13px}
+.hero-info p span{color:rgba(255,255,255,.7);margin-left:4px}
+.status-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;margin-top:8px}
+.status-pill.green{background:var(--green-bg);color:var(--green)}
+.status-pill.amber{background:var(--amber-bg);color:var(--amber)}
+.status-pill.red{background:var(--red-bg);color:var(--red)}
+.status-pulse{width:8px;height:8px;border-radius:50%;animation:pulse 2s infinite}
+.green .status-pulse{background:var(--green)}
+.amber .status-pulse{background:var(--amber)}
+.red   .status-pulse{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* KPI HERO ROW */
+.hero-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid rgba(255,255,255,.08)}
+.hkpi{padding:20px 24px;border-right:1px solid rgba(255,255,255,.08);position:relative}
+.hkpi:last-child{border-right:none}
+.hkpi-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--mid);margin-bottom:8px}
+.hkpi-value{font-size:32px;font-weight:700;color:#fff;line-height:1;margin-bottom:4px}
+.hkpi-value.gold{color:var(--gold)}
+.hkpi-value.green{color:#4DD98E}
+.hkpi-value.amber{color:#FFD066}
+.hkpi-value.red{color:#FF8080}
+.hkpi-sub{font-size:11px;color:var(--mid)}
+.hkpi-bar{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,.08)}
+.hkpi-bar-fill{height:100%;border-radius:1px;transition:width .6s ease}
+
+/* ── TABS ──────────────────────────────────────────────────────── */
+.tabs{background:var(--dark);padding:0 32px;display:flex;gap:0;border-top:1px solid rgba(255,255,255,.08)}
+.tab{padding:12px 20px;font-size:12px;font-weight:600;color:var(--mid);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.tab:hover{color:#fff}
+.tab.active{color:#fff;border-bottom-color:var(--gold)}
+
+/* ── CONTENT ───────────────────────────────────────────────────── */
+.content{padding:28px 32px;max-width:1200px}
+.panel{display:none}.panel.active{display:block}
+
+/* ── GRID HELPERS ──────────────────────────────────────────────── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+.g13{display:grid;grid-template-columns:1fr 3fr;gap:20px}
+.mb{margin-bottom:20px}
+
+/* ── CARD ──────────────────────────────────────────────────────── */
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.card-hdr{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--light)}
+.card-hdr h3{font-size:13px;font-weight:700;color:var(--dark)}
+.card-hdr .sub{font-size:11px;color:var(--mid)}
+.card-body{padding:20px}
+
+/* ── SECCIÓN LABEL ─────────────────────────────────────────────── */
+.sec-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--mid);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--light)}
+
+/* ── CURVA S ───────────────────────────────────────────────────── */
+.chart-wrap{position:relative;height:220px}
+
+/* ── HITOS ─────────────────────────────────────────────────────── */
+.timeline{position:relative;padding-left:28px}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--light)}
+.tl-item{position:relative;padding-bottom:20px}
+.tl-item:last-child{padding-bottom:0}
+.tl-dot{position:absolute;left:-24px;top:3px;width:16px;height:16px;border-radius:50%;border:2px solid var(--card);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff}
+.tl-dot.done {background:var(--green)}
+.tl-dot.next {background:var(--gold);animation:pulse 2s infinite}
+.tl-dot.future{background:var(--mid)}
+.tl-dot.late {background:var(--red)}
+.tl-title{font-size:12px;font-weight:600;color:var(--dark);margin-bottom:2px}
+.tl-date{font-size:11px;color:var(--mid)}
+.tl-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:8px;font-size:9px;font-weight:700;margin-top:4px}
+.tl-badge.done  {background:var(--green-bg);color:var(--green)}
+.tl-badge.next  {background:var(--amber-bg);color:var(--amber)}
+.tl-badge.future{background:var(--light);color:var(--mid)}
+.tl-badge.late  {background:var(--red-bg);color:var(--red)}
+
+/* ── RIESGOS ───────────────────────────────────────────────────── */
+.riesgo-item{padding:14px;border-radius:8px;margin-bottom:10px;border-left:3px solid transparent}
+.riesgo-item.high  {background:var(--red-bg);  border-left-color:var(--red)}
+.riesgo-item.med   {background:var(--amber-bg);border-left-color:var(--amber)}
+.riesgo-item.low   {background:var(--green-bg);border-left-color:var(--green)}
+.riesgo-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.riesgo-name{font-size:12px;font-weight:700;color:var(--dark)}
+.riesgo-desc{font-size:12px;color:var(--text);margin-bottom:8px;line-height:1.5}
+.riesgo-accion{font-size:11px;color:var(--mid)}
+.riesgo-accion strong{color:var(--dark)}
+.pill{padding:2px 8px;border-radius:8px;font-size:9px;font-weight:700}
+.pill.high {background:var(--red-bg);  color:var(--red)}
+.pill.med  {background:var(--amber-bg);color:var(--amber)}
+.pill.low  {background:var(--green-bg);color:var(--green)}
+
+/* ── INDICADOR SPI/CPI ─────────────────────────────────────────── */
+.index-row{display:flex;gap:12px;margin-bottom:20px}
+.index-card{flex:1;background:var(--light);border-radius:8px;padding:14px;text-align:center}
+.index-val{font-size:28px;font-weight:700;margin-bottom:4px}
+.index-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mid)}
+.index-meaning{font-size:10px;color:var(--mid);margin-top:4px}
+.gauge-wrap{position:relative;height:100px}
+
+/* ── ANÁLISIS IA ───────────────────────────────────────────────── */
+.ai-box{background:var(--dark);border-radius:var(--r);padding:20px 24px;color:#fff;position:relative;overflow:hidden}
+.ai-box::before{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;border-radius:50%;background:rgba(240,165,0,.08)}
+.ai-eyebrow{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.ai-text{font-size:13px;line-height:1.75;color:rgba(255,255,255,.85);position:relative;z-index:1}
+.ai-spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── TABLA ─────────────────────────────────────────────────────── */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{background:var(--dark);color:#fff;padding:8px 12px;text-align:left;font-size:11px;font-weight:600}
+.tbl td{padding:8px 12px;border-bottom:1px solid var(--light)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:nth-child(even) td{background:#FAFBFC}
+
+/* ── LOADING SCREEN ────────────────────────────────────────────── */
+.loading-screen{display:flex;align-items:center;justify-content:center;min-height:80vh;flex-direction:column;gap:16px}
+.ls-spinner{width:48px;height:48px;border:3px solid var(--light);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+.ls-title{font-size:16px;font-weight:600;color:var(--dark)}
+.ls-sub{font-size:13px;color:var(--mid)}
+
+/* ── FOOTER ────────────────────────────────────────────────────── */
+.footer{padding:20px 32px;border-top:1px solid var(--light);display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.footer-brand{font-size:12px;color:var(--mid)}
+.footer-brand strong{color:var(--dark)}
+.footer-note{font-size:11px;color:var(--mid)}
+.footer-gold{color:var(--gold);font-weight:600}
+
+/* ── NO-DATA ───────────────────────────────────────────────────── */
+.no-data{text-align:center;padding:40px;color:var(--mid);font-size:13px}
+
+@media(max-width:768px){
+  .hero-kpis{grid-template-columns:1fr 1fr}
+  .g2,.g3,.g13{grid-template-columns:1fr}
+  .content{padding:16px}
+  .topbar{padding:0 16px}
+  .hero{padding:20px 16px 0}
+  .tabs{padding:0 16px;overflow-x:auto}
+  .tab{padding:10px 14px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-left">
+    <div class="tb-brand">GAMING INGENIERÍA</div>
+    <div class="tb-divider"></div>
+    <div class="tb-project" id="tbProject">Cargando proyecto...</div>
+  </div>
+  <div class="tb-right">
+    <div class="tb-badge" id="tbBadge">PMO</div>
+    <div class="tb-date" id="tbDate"></div>
+  </div>
+</div>
+<div class="goldbar"></div>
+
+<!-- HERO -->
+<div class="hero" id="heroSection" style="display:none">
+  <div class="hero-top">
+    <div class="hero-info">
+      <h1 id="heroTitle">–</h1>
+      <p>Cliente: <span id="heroCliente">–</span></p>
+      <p>Consultor: <span id="heroConsultor">–</span> &nbsp;·&nbsp; Período: <span id="heroPeriodo">–</span></p>
+      <div class="status-pill" id="heroStatus"><div class="status-pulse"></div><span id="heroStatusTxt">–</span></div>
+    </div>
+    <div style="text-align:right">
+      <div style="color:var(--mid);font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px">ÚLTIMA ACTUALIZACIÓN</div>
+      <div style="color:var(--gold);font-size:15px;font-weight:700" id="heroUpdate">–</div>
+      <div style="color:var(--mid);font-size:11px;margin-top:4px" id="heroUpdateBy">–</div>
+    </div>
+  </div>
+  <div class="hero-kpis" id="heroKpis"></div>
+</div>
+
+<!-- TABS -->
+<div class="tabs" id="tabsSection" style="display:none">
+  <div class="tab active" onclick="switchTab('avance',this)">Avance general</div>
+  <div class="tab" onclick="switchTab('curva',this)">Curva S</div>
+  <div class="tab" onclick="switchTab('hitos',this)">Hitos</div>
+  <div class="tab" onclick="switchTab('riesgos',this)">Riesgos</div>
+  <div class="tab" onclick="switchTab('analisis',this)">Análisis IA</div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="ls-spinner"></div>
+  <div class="ls-title">Cargando reporte del proyecto...</div>
+  <div class="ls-sub" id="loadMsg">Conectando con Gaming Ingeniería</div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="content" id="mainContent" style="display:none">
+
+  <!-- ── PANEL: AVANCE ──────────────────────────────────── -->
+  <div class="panel active" id="panel-avance">
+
+    <div class="g2 mb">
+      <!-- SPI / CPI -->
+      <div class="card">
+        <div class="card-hdr"><h3>Índices de desempeño</h3><span class="sub">PMI Earned Value</span></div>
+        <div class="card-body">
+          <div class="index-row" id="indexRow"></div>
+          <div class="sec-label">Interpretación</div>
+          <div id="indexInterpretacion" style="font-size:12px;color:var(--text);line-height:1.7"></div>
+        </div>
+      </div>
+      <!-- Avance general -->
+      <div class="card">
+        <div class="card-hdr"><h3>Avance del proyecto</h3></div>
+        <div class="card-body">
+          <div class="gauge-wrap"><canvas id="chartGauge"></canvas></div>
+          <div id="avanceDetalle" style="margin-top:12px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fases -->
+    <div class="card mb">
+      <div class="card-hdr"><h3>Avance por fase</h3></div>
+      <div class="card-body">
+        <div class="chart-wrap"><canvas id="chartFases"></canvas></div>
+      </div>
+    </div>
+
+    <!-- AI insight -->
+    <div class="ai-box mb" id="aiAvance">
+      <div class="ai-eyebrow">✦ Análisis — Gaming Ingeniería PMO</div>
+      <div class="ai-text"><span class="ai-spinner"></span> Generando análisis...</div>
+    </div>
+  </div>
+
+  <!-- ── PANEL: CURVA S ─────────────────────────────────── -->
+  <div class="panel" id="panel-curva">
+    <div class="card mb">
+      <div class="card-hdr">
+        <h3>Curva S — Avance acumulado</h3>
+        <span class="sub">Planeado vs. Real vs. Earned Value</span>
+      </div>
+      <div class="card-body">
+        <div style="position:relative;height:320px"><canvas id="chartCurvaS"></canvas></div>
+      </div>
+    </div>
+    <div class="g3 mb" id="evCards"></div>
+  </div>
+
+  <!-- ── PANEL: HITOS ───────────────────────────────────── -->
+  <div class="panel" id="panel-hitos">
+    <div class="g2 mb">
+      <div class="card">
+        <div class="card-hdr"><h3>Hitos cumplidos</h3></div>
+        <div class="card-body"><div class="timeline" id="hitosDone"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><h3>Próximos hitos</h3></div>
+        <div class="card-body"><div class="timeline" id="hitosNext"></div></div>
+      </div>
+    </div>
+    <div class="card mb">
+      <div class="card-hdr"><h3>Todos los hitos</h3></div>
+      <table class="tbl">
+        <thead><tr><th>Hito / Entregable</th><th>Fecha plan.</th><th>Fecha real</th><th>Variación</th><th>Estado</th></tr></thead>
+        <tbody id="tbodyHitos"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── PANEL: RIESGOS ────────────────────────────────── -->
+  <div class="panel" id="panel-riesgos">
+    <div class="g13 mb">
+      <div>
+        <div class="card mb">
+          <div class="card-hdr"><h3>Resumen</h3></div>
+          <div class="card-body">
+            <div style="position:relative;height:160px"><canvas id="chartRiesgos"></canvas></div>
+          </div>
+        </div>
+      </div>
+      <div id="riesgosList"></div>
+    </div>
+  </div>
+
+  <!-- ── PANEL: ANÁLISIS IA ─────────────────────────────── -->
+  <div class="panel" id="panel-analisis">
+    <div class="ai-box mb" id="aiFull">
+      <div class="ai-eyebrow">✦ Reporte ejecutivo — Gaming Ingeniería</div>
+      <div class="ai-text"><span class="ai-spinner"></span> Generando análisis ejecutivo...</div>
+    </div>
+    <div class="card mb">
+      <div class="card-hdr"><h3>Datos del período</h3></div>
+      <div class="card-body">
+        <table class="tbl">
+          <thead><tr><th>Indicador</th><th>Valor</th><th>Referencia</th><th>Interpretación</th></tr></thead>
+          <tbody id="tbodyIndicadores"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div><!-- /content -->
+
+<div class="footer" id="footerSection" style="display:none">
+  <div class="footer-brand"><strong>GAMING INGENIERÍA</strong> · Consultoría en Project Management</div>
+  <div class="footer-note">Reporte generado con tecnología <span class="footer-gold">IA ✦</span> · Datos actualizados por el equipo Gaming</div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+// CONFIG PROYECTOS — Agregar un bloque por cada proyecto/cliente
+// ════════════════════════════════════════════════════════════════════
+// INSTRUCCIONES PARA AGREGAR UN PROYECTO NUEVO:
+// 1. Copia el bloque "demo" y pégalo abajo con un nuevo token
+// 2. Publica el Google Sheet (Archivo → Compartir → Publicar en web)
+//    Selecciona CADA hoja como CSV y copia los links
+// 3. Comparte con el cliente: dashboard.html?token=TU_TOKEN
+//
+// CÓMO OBTENER EL SHEET_ID:
+// Es el código largo en la URL de tu Google Sheet:
+// https://docs.google.com/spreadsheets/d/[AQUÍ_EL_ID]/edit
+// ════════════════════════════════════════════════════════════════════
+const PROYECTOS_CONFIG = {
+
+  // ── PROYECTO DEMO (datos de ejemplo — sin Sheet) ─────────────────
+  "demo": {
+    sheetId: "",          // Vacío = Claude genera datos de ejemplo
+    nombre: "Proyecto Demo — Gaming Ingeniería",
+    cliente: "Cliente Ejemplo",
+    tipo: "Consultoría PM"
+  },
+
+  // ── PLANTILLA PARA NUEVO PROYECTO ────────────────────────────────
+  // Copiar este bloque y completar para cada cliente:
+  /*
+  "token-del-proyecto": {
+    sheetId: "1ABC...XYZ",   // ID del Google Sheet publicado
+    nombre:  "Nombre del Proyecto",
+    cliente: "Nombre del Cliente",
+    tipo:    "PMO"            // PMO | Consultoría PM | Capacitación
+  },
+  */
+
+  // ── EJEMPLO: CEMIX GT02 ───────────────────────────────────────────
+  "cemix-gt02": {
+    sheetId: "1e-mVqifOTAkhRo3-rCyWa8qhcuk6fOZ1xHB45cEU7t0",
+    nombre:  "CEMIX - GT02",
+    cliente: "CEMIX Guatemala",
+    tipo:    "PMO"
+  },
+};
+
+// ════════════════════════════════════════════════════════════════════
+// LECTOR DE GOOGLE SHEETS (CSV publicado)
+// ════════════════════════════════════════════════════════════════════
+// Convierte el Sheet publicado en CSV a un objeto JS usable.
+// Google publica cada hoja con este patrón de URL:
+// https://docs.google.com/spreadsheets/d/[ID]/export?format=csv&gid=[GID]
+//
+// GIDs por hoja (buscarlos en la URL al abrir cada pestaña en Sheets):
+//   📋 PROYECTO      → gid=0  (primera hoja)
+//   📈 AVANCE        → gid=1
+//   🏁 HITOS         → gid=2
+//   ⚠ RIESGOS        → gid=3
+//   💰 EARNED VALUE  → gid=4
+// ════════════════════════════════════════════════════════════════════
+const SHEET_GIDS = {
+  proyecto:    "0",
+  avance:      "1",
+  hitos:       "2",
+  riesgos:     "3",
+  earnedValue: "4"
+};
+
+async function fetchSheetCSV(sheetId, gid) {
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`Sheet no disponible (gid=${gid})`);
+  return await resp.text();
+}
+
+function parseCSV(text) {
+  // Parser CSV robusto con soporte para campos con comas y comillas
+  const rows = [];
+  const lines = text.trim().split(/\r?\n/);
+  for (const line of lines) {
+    const cols = [];
+    let cur = "", inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') {
+        if (inQuotes && line[i+1] === '"') { cur += '"'; i++; }
+        else inQuotes = !inQuotes;
+      } else if (line[i] === ',' && !inQuotes) {
+        cols.push(cur.trim()); cur = "";
+      } else { cur += line[i]; }
+    }
+    cols.push(cur.trim());
+    rows.push(cols);
+  }
+  return rows;
+}
+
+// Transforma los CSV del Sheet en el mismo objeto JSON que espera render()
+async function buildDataFromSheets(sheetId, cfg) {
+  log("Leyendo hoja PROYECTO...");
+  const csvProy = await fetchSheetCSV(sheetId, SHEET_GIDS.proyecto);
+  const rowsProy = parseCSV(csvProy);
+
+  // La hoja PROYECTO tiene: fila 5=nombre/código, 6=cliente/tipo...
+  // Buscamos por etiqueta en columna B (índice 1)
+  const findVal = (label, rows, colIdx=2) => {
+    const row = rows.find(r => r[1] && r[1].toLowerCase().includes(label.toLowerCase()));
+    return row ? row[colIdx] || "" : "";
+  };
+
+  const proyecto = {
+    nombre:               findVal("nombre del proyecto", rowsProy),
+    cliente:              findVal("cliente", rowsProy),
+    tipo:                 findVal("tipo de servicio", rowsProy),
+    consultor:            findVal("consultor líder", rowsProy),
+    periodo:              findVal("período", rowsProy),
+    fechaInicio:          findVal("fecha de inicio", rowsProy),
+    fechaCierreContractual: findVal("fecha cierre contractual", rowsProy),
+    fechaActualizacion:   findVal("fecha de actualización", rowsProy, 4),
+    actualizadoPor:       findVal("actualizado por", rowsProy),
+    estado:               findVal("estado general", rowsProy),
+    avancePlanificado:    0,
+    avanceReal:           0,
+    diasTranscurridos:    parseInt(findVal("días transcurridos", rowsProy)) || 0,
+    diasTotales:          parseInt(findVal("días totales", rowsProy)) || 100,
+  };
+
+  log("Leyendo hoja EARNED VALUE...");
+  const csvEV = await fetchSheetCSV(sheetId, SHEET_GIDS.earnedValue);
+  const rowsEV = parseCSV(csvEV);
+  const findEV = (label) => parseFloat((findVal(label, rowsEV) || "0").replace(/[^0-9.-]/g,"")) || 0;
+
+  const ev = {
+    bac: findEV("BAC"),
+    pv:  findEV("PV —"),
+    ev:  findEV("EV —"),
+    ac:  findEV("AC —"),
+    spi: parseFloat(findVal("SPI —", rowsEV)) || 1,
+    cpi: parseFloat(findVal("CPI —", rowsEV)) || 1,
+    eac: findEV("EAC —"),
+    etc: findEV("ETC —"),
+    cv:  findEV("CV —"),
+    sv:  findEV("SV —"),
+  };
+  // EV% y avance vienen de la hoja AVANCE
+  proyecto.avancePlanificado = findEV("avance planificado") * 100 || (ev.pv/ev.bac*100);
+  proyecto.avanceReal        = findEV("avance real")       * 100 || (ev.ev/ev.bac*100);
+
+  log("Leyendo hoja AVANCE...");
+  const csvAv = await fetchSheetCSV(sheetId, SHEET_GIDS.avance);
+  const rowsAv = parseCSV(csvAv);
+
+  // Semanas en fila 4 (índice 3), datos desde columna C (índice 2)
+  const semanas    = (rowsAv[3] || []).slice(2).filter(Boolean);
+  const planRow    = rowsAv.find(r => r[1] && r[1].includes("PLANIFICADO")) || [];
+  const realRow    = rowsAv.find(r => r[1] && r[1].includes("REAL"))        || [];
+  const evRow      = rowsAv.find(r => r[1] && r[1].includes("EARNED"))      || [];
+
+  const toNumArr = (row) => row.slice(2).map(v => parseFloat((v||"0").replace(/[^0-9.-]/g,""))*100 || 0);
+
+  const curvaS = {
+    semanas,
+    planificado: toNumArr(planRow),
+    real:        toNumArr(realRow),
+    ev:          toNumArr(evRow),
+  };
+
+  // Fases: buscar filas individuales
+  const faseNames = ["Preliminares","Planificación","Ejecución","Cierre"];
+  const fases = faseNames.map(fn => {
+    const planF = rowsAv.find(r => r[1] && r[1].includes(fn) && r[1].includes("plan"));
+    const realF = rowsAv.find(r => r[1] && r[1].includes(fn) && r[1].includes("real"));
+    const lastPlan = planF ? parseFloat((planF.slice(2).filter(Boolean).pop()||"0").replace(/[^0-9.]/g,""))*100 : 0;
+    const lastReal = realF ? parseFloat((realF.slice(2).filter(Boolean).pop()||"0").replace(/[^0-9.]/g,""))*100 : 0;
+    return { nombre: fn, planificado: lastPlan, real: lastReal,
+             estado: lastReal >= lastPlan ? "En tiempo" : "En riesgo" };
+  });
+
+  log("Leyendo hoja HITOS...");
+  const csvHi = await fetchSheetCSV(sheetId, SHEET_GIDS.hitos);
+  const rowsHi = parseCSV(csvHi);
+  const hitos = rowsHi.slice(5).filter(r => r[1] && r[1].trim()).map(r => ({
+    nombre:      r[1] || "",
+    fechaPlan:   r[2] || "",
+    fechaReal:   r[3] || "",
+    estado:      r[4] || "future",
+    fase:        r[5] || "",
+    descripcion: r[6] || "",
+  }));
+
+  log("Leyendo hoja RIESGOS...");
+  const csvRi = await fetchSheetCSV(sheetId, SHEET_GIDS.riesgos);
+  const rowsRi = parseCSV(csvRi);
+  const riesgos = rowsRi.slice(5).filter(r => r[1] && r[1].trim()).map(r => ({
+    nombre:       r[1] || "",
+    descripcion:  r[2] || "",
+    impacto:      r[3] || "Medio",
+    probabilidad: r[4] || "Media",
+    nivel:        r[5] || "med",
+    accion:       r[6] || "",
+    responsable:  r[7] || "",
+    estado:       r[8] || "Abierto",
+  }));
+
+  return { proyecto, ev, curvaS, fases, hitos, riesgos,
+           insight: null, insightAvance: null };
+}
+
+// ════════════════════════════════════════════════════════════════════
+// UTILIDADES
+// ════════════════════════════════════════════════════════════════════
+const Q  = n => 'Q ' + Number(n).toLocaleString('es-GT',{minimumFractionDigits:0,maximumFractionDigits:0});
+const P  = n => Number(n).toFixed(1) + '%';
+const charts = {};
+function killChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
+function log(msg){ document.getElementById('loadMsg').textContent = msg; }
+function statusClass(s){
+  const m = {'En tiempo':'green','Completado':'green','En riesgo':'amber','Con problemas':'red','Atrasado':'red'};
+  return m[s] || 'amber';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// INIT — leer token de la URL y cargar datos
+// ════════════════════════════════════════════════════════════════════
+async function init() {
+  const params  = new URLSearchParams(window.location.search);
+  const token   = params.get('token') || 'demo';
+  const config  = PROYECTOS_CONFIG[token];
+
+  document.getElementById('tbDate').textContent =
+    new Date().toLocaleDateString('es-GT',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+
+  if (!config) {
+    document.getElementById('loadMsg').textContent = 'Proyecto no encontrado. Verifica tu enlace.';
+    return;
+  }
+
+  log('Preparando datos del proyecto...');
+  await new Promise(r => setTimeout(r,600));
+  log('Solicitando análisis a Claude IA...');
+
+  // ── LLAMADA A CLAUDE API ─────────────────────────────────────────
+  const systemPrompt = `Eres el sistema de reportes de Gaming Ingeniería, una consultora guatemalteca de Project Management.
+Genera un JSON completo con datos realistas para el reporte del cliente.
+Responde ÚNICAMENTE con JSON válido, sin texto adicional, sin markdown.
+El JSON debe tener esta estructura:
+{
+  "proyecto": {
+    "nombre": "",
+    "cliente": "",
+    "tipo": "",
+    "consultor": "",
+    "periodo": "",
+    "fechaInicio": "",
+    "fechaCierreContractual": "",
+    "fechaActualizacion": "",
+    "actualizadoPor": "",
+    "estado": "",
+    "avancePlanificado": 0,
+    "avanceReal": 0,
+    "diasTranscurridos": 0,
+    "diasTotales": 0
+  },
+  "ev": {
+    "pv": 0,
+    "ev": 0,
+    "ac": 0,
+    "bac": 0,
+    "spi": 0.0,
+    "cpi": 0.0,
+    "eac": 0,
+    "etc": 0,
+    "cv": 0,
+    "sv": 0
+  },
+  "curvaS": {
+    "semanas": ["S1","S2","S3","S4","S5","S6","S7","S8","S9","S10","S11","S12"],
+    "planificado": [0,0,0,0,0,0,0,0,0,0,0,0],
+    "real":        [0,0,0,0,0,0,0,0,0,0,0,0],
+    "ev":          [0,0,0,0,0,0,0,0,0,0,0,0]
+  },
+  "fases": [
+    {"nombre":"Preliminares","planificado":0,"real":0,"estado":""},
+    {"nombre":"Planificación","planificado":0,"real":0,"estado":""},
+    {"nombre":"Ejecución","planificado":0,"real":0,"estado":""},
+    {"nombre":"Cierre","planificado":0,"real":0,"estado":""}
+  ],
+  "hitos": [
+    {"nombre":"","fechaPlan":"","fechaReal":"","estado":"done|next|future|late","descripcion":""}
+  ],
+  "riesgos": [
+    {"nombre":"","descripcion":"","impacto":"Alto|Medio|Bajo","probabilidad":"Alta|Media|Baja",
+     "nivel":"high|med|low","accion":"","responsable":"","estado":"Abierto|Mitigado"}
+  ],
+  "insight": "Análisis narrativo ejecutivo en 3-4 párrafos para el cliente, mencionando SPI, CPI, hitos próximos y situación de riesgos. Tono profesional pero cercano.",
+  "insightAvance": "Análisis breve 2 oraciones sobre el avance actual."
+}`;
+
+  const userPrompt = `Proyecto: ${config.nombre}
+Cliente: ${config.cliente}
+Tipo: ${config.tipo}
+Token: ${token}
+
+Genera datos REALISTAS para un proyecto de consultoría PM guatemalteco en curso.
+- El proyecto debe tener entre 8-12 semanas de ejecución de 20 semanas totales
+- SPI entre 0.85 y 1.05, CPI entre 0.90 y 1.10
+- Al menos 4 hitos: 2 completados, 1 próximo en 2 semanas, 1 futuro
+- 3-5 riesgos: 1 alto, 2 medios, 1 bajo
+- Usa montos en Quetzales guatemaltecos
+- Nombres de empresas y personas guatemaltecas plausibles
+Responde SOLO con el JSON.`;
+
+  try {
+    let data;
+    const sheetId = config.sheetId;
+
+    if (sheetId && sheetId.trim() !== "") {
+      // ── MODO REAL: leer desde Google Sheets ────────────────────────
+      log("Conectando con Google Sheets...");
+      try {
+        data = await buildDataFromSheets(sheetId, config);
+        data.proyecto.nombre  = data.proyecto.nombre  || config.nombre;
+        data.proyecto.cliente = data.proyecto.cliente || config.cliente;
+        data.proyecto.tipo    = data.proyecto.tipo    || config.tipo;
+        log("Datos del Sheet leídos correctamente. Generando análisis IA...");
+      } catch(sheetErr) {
+        log("Sheet no disponible — " + sheetErr.message + " — usando IA para datos de ejemplo...");
+        data = null;
+      }
+    }
+
+    if (!data) {
+      // ── MODO DEMO: Claude genera datos de ejemplo ────────────────
+      log("Generando datos de ejemplo con Claude IA...");
+    }
+
+    if (!data || !data.insight) {
+      // Generar análisis narrativo con Claude (siempre, para ambos modos)
+      const contextData = data ? JSON.stringify({
+        proyecto: data.proyecto, ev: data.ev,
+        hitosResumen: { completados: data.hitos.filter(h=>h.estado==="done").length,
+                        proximos:    data.hitos.filter(h=>h.estado==="next").length,
+                        atrasados:   data.hitos.filter(h=>h.estado==="late").length },
+        riesgosResumen: { altos: data.riesgos.filter(r=>r.nivel==="high").length,
+                          medios: data.riesgos.filter(r=>r.nivel==="med").length }
+      }) : null;
+
+      const sysPrompt = data
+        ? `Eres el sistema de reportes de Gaming Ingeniería. Genera análisis narrativos en español para el cliente basados en los datos reales proporcionados. Sé específico, menciona los valores de SPI y CPI, el estado de hitos y riesgos. Tono profesional y cercano. Responde SOLO con JSON: {"insight": "...", "insightAvance": "..."}`
+        : `Eres el sistema de reportes de Gaming Ingeniería. Genera datos de ejemplo completos Y análisis narrativos en español. Responde SOLO con JSON válido sin markdown.`;
+
+      const userMsg = data
+        ? `Datos del proyecto: ${contextData}\nGenera: insight ejecutivo (3-4 párrafos para el cliente) e insightAvance (2 oraciones sobre avance).`
+        : userPrompt;
+
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: data ? 1000 : 3000,
+          system: sysPrompt,
+          messages: [{ role:'user', content: userMsg }]
+        })
+      });
+
+      if (!resp.ok) throw new Error('API ' + resp.status);
+      const api = await resp.json();
+      const raw = api.content[0].text.replace(/```json|```/g,'').trim();
+      const parsed = JSON.parse(raw);
+
+      if (data) {
+        // Solo actualizar los insights
+        data.insight       = parsed.insight;
+        data.insightAvance = parsed.insightAvance;
+      } else {
+        // Usar los datos completos generados por Claude
+        data = parsed;
+      }
+    }
+
+    log('Construyendo dashboard...');
+    await new Promise(r=>setTimeout(r,400));
+    render(data, config);
+
+  } catch(err) {
+    console.error(err);
+    log('Error al cargar datos: ' + err.message);
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════════════════════════
+function render(d, cfg) {
+  const p = d.proyecto;
+  const ev = d.ev;
+
+  // Ocultar loading, mostrar dashboard
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('heroSection').style.display = 'block';
+  document.getElementById('tabsSection').style.display = 'flex';
+  document.getElementById('mainContent').style.display = 'block';
+  document.getElementById('footerSection').style.display = 'flex';
+
+  // ── TOPBAR ──────────────────────────────────────────────────────
+  document.getElementById('tbProject').textContent = p.nombre;
+  document.getElementById('tbBadge').textContent = p.tipo;
+
+  // ── HERO ────────────────────────────────────────────────────────
+  document.getElementById('heroTitle').textContent = p.nombre;
+  document.getElementById('heroCliente').textContent = p.cliente;
+  document.getElementById('heroConsultor').textContent = p.consultor;
+  document.getElementById('heroPeriodo').textContent = p.periodo;
+  document.getElementById('heroUpdate').textContent = p.fechaActualizacion;
+  document.getElementById('heroUpdateBy').textContent = 'Actualizado por ' + p.actualizadoPor;
+
+  const sc = statusClass(p.estado);
+  const statusEl = document.getElementById('heroStatus');
+  statusEl.className = 'status-pill ' + sc;
+  document.getElementById('heroStatusTxt').textContent = p.estado;
+
+  // Hero KPIs
+  const spiColor = ev.spi >= 1 ? 'green' : ev.spi >= 0.85 ? 'amber' : 'red';
+  const cpiColor = ev.cpi >= 1 ? 'green' : ev.cpi >= 0.85 ? 'amber' : 'red';
+  const dias = Math.round((p.diasTranscurridos / p.diasTotales) * 100);
+  document.getElementById('heroKpis').innerHTML = `
+    <div class="hkpi">
+      <div class="hkpi-label">Avance real</div>
+      <div class="hkpi-value ${sc === 'green'?'gold':sc === 'amber'?'amber':'red'}">${P(p.avanceReal)}</div>
+      <div class="hkpi-sub">Plan: ${P(p.avancePlanificado)}</div>
+      <div class="hkpi-bar"><div class="hkpi-bar-fill" style="width:${p.avanceReal}%;background:var(--gold)"></div></div>
+    </div>
+    <div class="hkpi">
+      <div class="hkpi-label">SPI — Schedule</div>
+      <div class="hkpi-value ${spiColor}">${ev.spi.toFixed(2)}</div>
+      <div class="hkpi-sub">${ev.spi >= 1 ? 'Adelante del cronograma' : ev.spi >= 0.85 ? 'Ligero retraso' : 'Retraso significativo'}</div>
+      <div class="hkpi-bar"><div class="hkpi-bar-fill" style="width:${Math.min(ev.spi*100,100)}%;background:${ev.spi>=1?'var(--green)':ev.spi>=0.85?'var(--amber)':'var(--red)'}"></div></div>
+    </div>
+    <div class="hkpi">
+      <div class="hkpi-label">CPI — Costo</div>
+      <div class="hkpi-value ${cpiColor}">${ev.cpi.toFixed(2)}</div>
+      <div class="hkpi-sub">${ev.cpi >= 1 ? 'Bajo presupuesto' : ev.cpi >= 0.85 ? 'Sobre costo leve' : 'Sobre costo significativo'}</div>
+      <div class="hkpi-bar"><div class="hkpi-bar-fill" style="width:${Math.min(ev.cpi*100,100)}%;background:${ev.cpi>=1?'var(--green)':ev.cpi>=0.85?'var(--amber)':'var(--red)'}"></div></div>
+    </div>
+    <div class="hkpi">
+      <div class="hkpi-label">Tiempo transcurrido</div>
+      <div class="hkpi-value">${p.diasTranscurridos}<span style="font-size:16px;color:var(--mid)"> días</span></div>
+      <div class="hkpi-sub">de ${p.diasTotales} días totales</div>
+      <div class="hkpi-bar"><div class="hkpi-bar-fill" style="width:${dias}%;background:var(--gold)"></div></div>
+    </div>`;
+
+  renderAvance(d);
+  renderCurvaS(d);
+  renderHitos(d);
+  renderRiesgos(d);
+  renderAnalisis(d);
+}
+
+// ── PANEL AVANCE ─────────────────────────────────────────────────
+function renderAvance(d) {
+  const ev = d.ev;
+  const p  = d.proyecto;
+
+  // Índices SPI / CPI
+  const spiC = ev.spi>=1?'var(--green)':ev.spi>=0.85?'var(--amber)':'var(--red)';
+  const cpiC = ev.cpi>=1?'var(--green)':ev.cpi>=0.85?'var(--amber)':'var(--red)';
+  document.getElementById('indexRow').innerHTML = `
+    <div class="index-card">
+      <div class="index-val" style="color:${spiC}">${ev.spi.toFixed(2)}</div>
+      <div class="index-label">SPI</div>
+      <div class="index-meaning">Schedule Performance</div>
+    </div>
+    <div class="index-card">
+      <div class="index-val" style="color:${cpiC}">${ev.cpi.toFixed(2)}</div>
+      <div class="index-label">CPI</div>
+      <div class="index-meaning">Cost Performance</div>
+    </div>
+    <div class="index-card">
+      <div class="index-val" style="color:var(--dark)">${Q(ev.eac)}</div>
+      <div class="index-label">EAC</div>
+      <div class="index-meaning">Costo final estimado</div>
+    </div>`;
+
+  document.getElementById('indexInterpretacion').innerHTML =
+    `<b>SPI ${ev.spi.toFixed(2)}</b> — ${ev.spi>=1?'El proyecto avanza según o mejor de lo planeado en tiempo.':'El proyecto presenta un retraso en el cronograma. Se están tomando acciones correctivas.'}<br>
+     <b>CPI ${ev.cpi.toFixed(2)}</b> — ${ev.cpi>=1?'El costo está por debajo del presupuesto. Eficiencia favorable.':'El costo ejecutado supera el valor ganado. Se revisa la eficiencia de recursos.'}<br>
+     <b>EAC ${Q(ev.eac)}</b> — Proyección del costo total al cierre basada en el desempeño actual.`;
+
+  // Gauge avance
+  killChart('chartGauge');
+  charts['chartGauge'] = new Chart(document.getElementById('chartGauge'), {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [p.avanceReal, 100-p.avanceReal],
+        backgroundColor: [p.avanceReal>=p.avancePlanificado?'#1A8A4A':'#F0A500','#F2F3F4'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false, cutout:'72%',
+      plugins:{ legend:{display:false},
+        tooltip:{callbacks:{label:i=>i.dataIndex===0?`Avance real: ${P(p.avanceReal)}`:''}}}
+    },
+    plugins: [{
+      id:'center-text',
+      beforeDraw(chart){
+        const {width,height,ctx} = chart;
+        ctx.save();
+        ctx.font = 'bold 28px Segoe UI';
+        ctx.fillStyle = '#2C3E50';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(P(p.avanceReal), width/2, height/2 - 10);
+        ctx.font = '12px Segoe UI';
+        ctx.fillStyle = '#9EA5AE';
+        ctx.fillText('Avance real', width/2, height/2 + 16);
+        ctx.restore();
+      }
+    }]
+  });
+
+  document.getElementById('avanceDetalle').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+      <div style="background:var(--light);padding:8px;border-radius:6px">
+        <div style="color:var(--mid);margin-bottom:2px">Planificado</div>
+        <div style="font-weight:700;color:var(--dark)">${P(p.avancePlanificado)}</div>
+      </div>
+      <div style="background:var(--light);padding:8px;border-radius:6px">
+        <div style="color:var(--mid);margin-bottom:2px">Real</div>
+        <div style="font-weight:700;color:${p.avanceReal>=p.avancePlanificado?'var(--green)':'var(--amber)'}">${P(p.avanceReal)}</div>
+      </div>
+      <div style="background:var(--light);padding:8px;border-radius:6px">
+        <div style="color:var(--mid);margin-bottom:2px">Variación</div>
+        <div style="font-weight:700;color:${(p.avanceReal-p.avancePlanificado)>=0?'var(--green)':'var(--red)'}">
+          ${(p.avanceReal-p.avancePlanificado)>=0?'+':''}${P(p.avanceReal-p.avancePlanificado)}</div>
+      </div>
+      <div style="background:var(--light);padding:8px;border-radius:6px">
+        <div style="color:var(--mid);margin-bottom:2px">Días restantes</div>
+        <div style="font-weight:700;color:var(--dark)">${p.diasTotales-p.diasTranscurridos}</div>
+      </div>
+    </div>`;
+
+  // Fases
+  killChart('chartFases');
+  charts['chartFases'] = new Chart(document.getElementById('chartFases'),{
+    type:'bar',
+    data:{
+      labels: d.fases.map(f=>f.nombre),
+      datasets:[
+        {label:'Planificado',data:d.fases.map(f=>f.planificado),backgroundColor:'#3D4A5C',borderRadius:4},
+        {label:'Real',       data:d.fases.map(f=>f.real),        backgroundColor:'#F0A500',borderRadius:4},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}}},
+      scales:{
+        y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%',font:{size:9}}},
+        x:{ticks:{font:{size:10}}}
+      }
+    }
+  });
+
+  document.getElementById('aiAvance').querySelector('.ai-text').textContent = d.insightAvance || 'Análisis disponible en la pestaña Análisis IA.';
+}
+
+// ── PANEL CURVA S ─────────────────────────────────────────────────
+function renderCurvaS(d) {
+  const cs = d.curvaS;
+  killChart('chartCurvaS');
+  charts['chartCurvaS'] = new Chart(document.getElementById('chartCurvaS'),{
+    type:'line',
+    data:{
+      labels: cs.semanas,
+      datasets:[
+        {label:'Valor Planeado (PV)',data:cs.planificado,borderColor:'#3D4A5C',
+         backgroundColor:'rgba(61,74,92,.08)',tension:.4,fill:true,pointRadius:3},
+        {label:'Avance Real (%)',    data:cs.real,       borderColor:'#F0A500',
+         backgroundColor:'rgba(240,165,0,.08)',tension:.4,fill:true,pointRadius:3},
+        {label:'Valor Ganado (EV)',  data:cs.ev,         borderColor:'#1A8A4A',
+         backgroundColor:'rgba(26,138,74,.08)',tension:.4,fill:false,
+         borderDash:[5,3],pointRadius:3},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}}},
+      scales:{
+        y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%',font:{size:9}},
+           grid:{color:'rgba(0,0,0,.04)'}},
+        x:{ticks:{font:{size:10}},grid:{display:false}}
+      }
+    }
+  });
+
+  const ev = d.ev;
+  document.getElementById('evCards').innerHTML = [
+    {label:'Valor Planeado (PV)',  val:Q(ev.pv), color:'var(--dark)', desc:'Lo que debería estar hecho'},
+    {label:'Valor Ganado (EV)',    val:Q(ev.ev), color:'var(--green)',desc:'Lo que realmente avanzó'},
+    {label:'Costo Real (AC)',      val:Q(ev.ac), color:'var(--amber)',desc:'Lo que se ha gastado'},
+  ].map(c=>`
+    <div class="card">
+      <div class="card-body" style="text-align:center;padding:16px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--mid);margin-bottom:6px">${c.label}</div>
+        <div style="font-size:24px;font-weight:700;color:${c.color};margin-bottom:4px">${c.val}</div>
+        <div style="font-size:11px;color:var(--mid)">${c.desc}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── PANEL HITOS ───────────────────────────────────────────────────
+function renderHitos(d) {
+  const done = d.hitos.filter(h=>h.estado==='done');
+  const next = d.hitos.filter(h=>h.estado==='next'||h.estado==='late');
+  const fut  = d.hitos.filter(h=>h.estado==='future');
+
+  const tlHTML = (items) => items.length === 0
+    ? '<div class="no-data">Sin hitos</div>'
+    : items.map(h=>`
+      <div class="tl-item">
+        <div class="tl-dot ${h.estado}">${h.estado==='done'?'✓':h.estado==='late'?'!':'→'}</div>
+        <div class="tl-title">${h.nombre}</div>
+        <div class="tl-date">${h.estado==='done'?'Completado: '+h.fechaReal:'Vence: '+h.fechaPlan}</div>
+        ${h.descripcion?`<div style="font-size:11px;color:var(--mid);margin-top:3px">${h.descripcion}</div>`:''}
+        <span class="tl-badge ${h.estado}">${{done:'Completado',next:'Próximo',future:'Pendiente',late:'Atrasado'}[h.estado]}</span>
+      </div>`).join('');
+
+  document.getElementById('hitosDone').innerHTML = tlHTML(done);
+  document.getElementById('hitosNext').innerHTML = tlHTML([...next,...fut]);
+
+  document.getElementById('tbodyHitos').innerHTML = d.hitos.map(h=>{
+    const dias = h.fechaReal && h.fechaPlan
+      ? Math.round((new Date(h.fechaReal.split('/').reverse().join('-')) -
+                    new Date(h.fechaPlan.split('/').reverse().join('-')))/(1000*60*60*24))
+      : null;
+    const varStr = dias===null ? '–' : dias===0 ? 'En fecha'
+      : dias < 0 ? `<span style="color:var(--green)">${dias}d adelanto</span>`
+      : `<span style="color:var(--red)">+${dias}d retraso</span>`;
+    return `<tr>
+      <td><strong>${h.nombre}</strong>${h.descripcion?`<div style="font-size:10px;color:var(--mid)">${h.descripcion}</div>`:''}</td>
+      <td>${h.fechaPlan}</td>
+      <td>${h.fechaReal||'–'}</td>
+      <td>${varStr}</td>
+      <td><span class="tl-badge ${h.estado}">${{done:'✓ Completado',next:'→ Próximo',future:'◎ Pendiente',late:'! Atrasado'}[h.estado]}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── PANEL RIESGOS ─────────────────────────────────────────────────
+function renderRiesgos(d) {
+  // Donut
+  const hi = d.riesgos.filter(r=>r.nivel==='high').length;
+  const me = d.riesgos.filter(r=>r.nivel==='med').length;
+  const lo = d.riesgos.filter(r=>r.nivel==='low').length;
+  killChart('chartRiesgos');
+  charts['chartRiesgos'] = new Chart(document.getElementById('chartRiesgos'),{
+    type:'doughnut',
+    data:{
+      labels:['Alto','Medio','Bajo'],
+      datasets:[{data:[hi,me,lo],backgroundColor:['#A02020','#9A6800','#1A8A4A'],borderWidth:2}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',
+      plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}}}}
+  });
+
+  document.getElementById('riesgosList').innerHTML = d.riesgos.map(r=>`
+    <div class="riesgo-item ${r.nivel}">
+      <div class="riesgo-hdr">
+        <div class="riesgo-name">${r.nombre}</div>
+        <div style="display:flex;gap:6px">
+          <span class="pill ${r.nivel}">Impacto: ${r.impacto}</span>
+          <span class="pill ${r.probabilidad==='Alta'?'high':r.probabilidad==='Media'?'med':'low'}">Prob.: ${r.probabilidad}</span>
+        </div>
+      </div>
+      <div class="riesgo-desc">${r.descripcion}</div>
+      <div class="riesgo-accion"><strong>Plan de acción:</strong> ${r.accion}</div>
+      <div style="font-size:11px;color:var(--mid);margin-top:4px">Responsable: <strong>${r.responsable}</strong> · Estado: ${r.estado}</div>
+    </div>`).join('');
+}
+
+// ── PANEL ANÁLISIS ────────────────────────────────────────────────
+function renderAnalisis(d) {
+  document.getElementById('aiFull').querySelector('.ai-text').textContent = d.insight;
+
+  const ev = d.ev;
+  const p  = d.proyecto;
+  document.getElementById('tbodyIndicadores').innerHTML = [
+    {ind:'Avance planificado (PV%)',     val:P(p.avancePlanificado), ref:'Cronograma contractual',                              int: p.avanceReal >= p.avancePlanificado ? '✅ Cumplido' : '⚠ Por debajo de lo esperado'},
+    {ind:'Avance real (EV%)',            val:P(p.avanceReal),        ref:'Trabajo efectivamente completado',                    int: p.avanceReal >= p.avancePlanificado ? '✅ Favorable' : '⚠ Requiere atención'},
+    {ind:'SPI (Schedule Performance)',   val:ev.spi.toFixed(2),      ref:'1.0 = perfecto, >1 adelanto, <1 retraso',           int: ev.spi>=1?'✅ En o adelante del cronograma':ev.spi>=0.85?'⚠ Ligero retraso':'🔴 Retraso significativo'},
+    {ind:'CPI (Cost Performance)',       val:ev.cpi.toFixed(2),      ref:'1.0 = perfecto, >1 eficiente, <1 sobre costo',      int: ev.cpi>=1?'✅ Bajo presupuesto':ev.cpi>=0.85?'⚠ Leve sobrecosto':'🔴 Sobrecosto significativo'},
+    {ind:'Valor planeado (PV)',          val:Q(ev.pv),               ref:'Costo presupuestado del trabajo planeado',           int: '–'},
+    {ind:'Valor ganado (EV)',            val:Q(ev.ev),               ref:'Costo presupuestado del trabajo completado',         int: ev.ev>=ev.pv?'✅ Sobre o en plan':'⚠ Bajo el plan'},
+    {ind:'Costo real (AC)',              val:Q(ev.ac),               ref:'Costo real ejecutado a la fecha',                    int: ev.ac<=ev.ev?'✅ Eficiente':'⚠ Revisión recomendada'},
+    {ind:'EAC (Costo total estimado)',   val:Q(ev.eac),              ref:'Proyección del costo final del proyecto',            int: ev.eac<=ev.bac?'✅ Dentro del presupuesto':'⚠ Proyecta sobrecosto'},
+    {ind:'Variación de costo (CV)',      val:Q(ev.cv),               ref:'EV − AC (positivo = favorable)',                     int: ev.cv>=0?'✅ Favorable':'⚠ Desfavorable'},
+    {ind:'Variación de cronograma (SV)', val:Q(ev.sv),               ref:'EV − PV (positivo = adelante)',                      int: ev.sv>=0?'✅ Adelante o en fecha':'⚠ Retraso'},
+  ].map((r,i)=>`<tr>
+    <td><strong>${r.ind}</strong></td>
+    <td style="font-weight:700;color:var(--dark)">${r.val}</td>
+    <td style="color:var(--mid);font-size:11px">${r.ref}</td>
+    <td>${r.int}</td>
+  </tr>`).join('');
+}
+
+// ── TABS ──────────────────────────────────────────────────────────
+function switchTab(id, el) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── START ─────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

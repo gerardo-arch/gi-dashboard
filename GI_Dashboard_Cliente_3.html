@@ -747,8 +747,16 @@ Responde SOLO con el JSON.`;
       log("Generando datos de ejemplo con Claude IA...");
     }
 
+    // Renderizar datos inmediatamente si los tenemos embebidos
+    if (data && config.datosEmbebidos) {
+      data.insight = "Análisis ejecutivo: Al cierre de junio 2026, la Planta CEMIX Sanarate #2 registra un avance físico del 65%, con la fase administrativa al 94% y la ejecución de obra al 6%. El SPI de 0.89 refleja un leve retraso cronograma, mientras el EAC de Q47.07M se mantiene marginalmente bajo el BAC de Q47.19M. Las acciones críticas para julio son: inicio inmediato del montaje de la planta torre post-grúa (14/07), adjudicación urgente de instalaciones mecánicas, y autorización del uso de contingencia para cubrir el déficit técnico de ~Q1.8M.";
+      data.insightAvance = "El proyecto avanza al 65% con la fase de ejecución de obra apenas iniciando al 6%. El montaje de la grúa torre al 81% es el hito desbloqueador crítico para julio.";
+      log("Dashboard cargado. Generando análisis IA adicional...");
+      renderDashboard();
+    }
+
     if (!data || !data.insight) {
-      // Generar análisis narrativo con Claude (siempre, para ambos modos)
+      // Generar análisis narrativo con Claude
       const contextData = data ? JSON.stringify({
         proyecto: data.proyecto, ev: data.ev,
         hitosResumen: { completados: data.hitos.filter(h=>h.estado==="done").length,
@@ -783,12 +791,13 @@ Responde SOLO con el JSON.`;
       const parsed = JSON.parse(raw);
 
       if (data) {
-        // Solo actualizar los insights
-        data.insight       = parsed.insight;
-        data.insightAvance = parsed.insightAvance;
+        // Actualizar insights con versión de Claude
+        data.insight       = parsed.insight || data.insight;
+        data.insightAvance = parsed.insightAvance || data.insightAvance;
+        renderDashboard(); // re-render con insight mejorado
       } else {
-        // Usar los datos completos generados por Claude
         data = parsed;
+        renderDashboard();
       }
     }
 

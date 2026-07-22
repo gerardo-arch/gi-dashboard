@@ -388,7 +388,7 @@ const PROYECTOS_CONFIG = {
 
   // ── EJEMPLO: CEMIX GT02 ───────────────────────────────────────────
   "cemix-gt02": {
-    sheetId: "1e-mVqifOTAkhRo3-rCyWa8qhcuk6fOZ1xHB45cEU7t0",
+    sheetId: "2PACX-1vRnpC57HMJEyhcUfVrtX8elKa1pQxNoUdzMuS_DAtC_51GaAL_RKf6YFfNk6WxxDZo-EM4llhBNlqFL",
     nombre:  "CEMIX - GT02",
     cliente: "CEMIX Guatemala",
     tipo:    "PMO"
@@ -418,7 +418,7 @@ const SHEET_GIDS = {
 };
 
 async function fetchSheetCSV(sheetId, gid) {
-  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+  const url = `https://docs.google.com/spreadsheets/d/e/${sheetId}/pub?output=csv&gid=${gid}`;
   const resp = await fetch(url);
   if (!resp.ok) throw new Error(`Sheet no disponible (gid=${gid})`);
   return await resp.text();
